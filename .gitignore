@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+
+# Data
+data/delta/
+data/chroma_db/
+data/onnx_models/
+data/sample/*.csv
+!data/sample/.gitkeep
+!data/.gitkeep
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Spark
+derby.log
+metastore_db/
+spark-warehouse/

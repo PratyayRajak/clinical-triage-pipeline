@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Clinical Triage Workbench</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Clinical Triage Pipeline</p>
+        <h1>Patient Note Review</h1>
+      </div>
+      <div class="status-pill" id="status-pill">Checking API</div>
+    </header>
+
+    <main class="layout">
+      <section class="workspace" aria-labelledby="note-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Input</p>
+            <h2 id="note-title">Clinical Note</h2>
+          </div>
+          <button class="ghost-button" id="sample-button" type="button">Load Sample</button>
+        </div>
+
+        <label for="specialty">Specialty</label>
+        <select id="specialty">
+          <option>CARDIOLOGY</option>
+          <option>GENERAL</option>
+          <option>NEUROLOGY</option>
+          <option>ORTHOPEDIC</option>
+          <option>PULMONOLOGY</option>
+          <option>EMERGENCY</option>
+        </select>
+
+        <label for="note">Patient note</label>
+        <textarea id="note" spellcheck="true">58-year-old male with substernal chest pain radiating to the left arm. EKG shows ST elevation. Takes aspirin and atorvastatin.</textarea>
+
+        <div class="actions">
+          <button id="triage-button" type="button">Run Triage</button>
+          <button class="secondary-button" id="clear-button" type="button">Clear</button>
+        </div>
+      </section>
+
+      <section class="results" aria-labelledby="result-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h2 id="result-title">Triage Result</h2>
+          </div>
+          <span class="latency" id="latency">Ready</span>
+        </div>
+
+        <div class="summary-grid">
+          <div class="metric">
+            <span>Risk Level</span>
+            <strong id="risk-level">-</strong>
+          </div>
+          <div class="metric">
+            <span>Risk Score</span>
+            <strong id="risk-score">-</strong>
+          </div>
+          <div class="metric">
+            <span>Validation</span>
+            <strong id="validation">-</strong>
+          </div>
+        </div>
+
+        <div class="result-block">
+          <h3>Reasoning</h3>
+          <p id="reasoning">Run a note to see the assessment.</p>
+        </div>
+
+        <div class="result-block">
+          <h3>Care Pathway</h3>
+          <pre id="care-pathway">-</pre>
+        </div>
+
+        <div class="entity-grid" id="entities"></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

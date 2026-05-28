@@ -1,0 +1,92 @@
+name: Clinical Triage Pipeline CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m spacy download en_core_web_sm
+
+      - name: Check formatting
+        run: black --check src/ tests/
+
+      - name: Check import order
+        run: isort --check-only src/ tests/
+
+      - name: Run unit tests
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          MLFLOW_TRACKING_URI: "file:./mlruns"
+        run: pytest tests/ -v --tb=short
+
+  eval-gate:
+    name: Evaluation Gate
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m spacy download en_core_web_sm
+
+      - name: Generate sample data
+        run: python scripts/generate_sample_data.py
+
+      - name: Run eval gate
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          MLFLOW_TRACKING_URI: "file:./mlruns"
+        run: python scripts/run_eval_gate.py
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: eval-gate
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t clinical-triage-pipeline:${{ github.sha }} .
+
+      - name: Smoke test container
+        run: |
+          docker run -d --name triage-test \
+            -e GROQ_API_KEY=dummy \
+            -e MLFLOW_TRACKING_URI=file:///tmp/mlruns \
+            -p 8000:8000 \
+            clinical-triage-pipeline:${{ github.sha }}
+          sleep 10
+          curl -f http://localhost:8000/health || (docker logs triage-test && exit 1)
+          docker stop triage-test
